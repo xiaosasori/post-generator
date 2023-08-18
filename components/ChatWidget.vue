@@ -19,21 +19,28 @@ const messages = useSessionStorage<Message[]>('messages', [])
 
 const usersTyping = ref<User[]>([])
 
-// send messages to Chat API here
-// and in the empty function below
+const messagesForAPI = computed(() =>
+  messages.value.map((m) => ({
+    role: m.userId,
+    content: m.text,
+  })),
+)
 
+const { chat } = useChatAi({ agent: 'customerSupport' })
 async function handleNewMessage(message: Message) {
   try {
     messages.value.push(message)
     usersTyping.value.push(bot.value)
-    const res = await fetchWithTimeout('/api/ai', {
-      method: 'POST',
-      body: { message: message.text },
-    })
+    // const res = await fetchWithTimeout('/api/ai', {
+    //   method: 'POST',
+    //   body: { message: message.text },
+    // })
+    const res = await chat({ messages: messagesForAPI.value })
+    if (!res || !res.choices[0].message?.content) return
     messages.value.push({
       id: nanoid(),
       createdAt: new Date(),
-      text: res.content,
+      text: res.choices[0].message?.content,
       userId: 'assistant',
     })
   } catch (err) {

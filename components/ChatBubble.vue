@@ -3,7 +3,7 @@
 import Markdown from 'vue3-markdown-it'
 import type { Message, User } from '@/types'
 
-const props = defineProps<{
+defineProps<{
   user?: User
   message?: Message
   myMessage?: boolean
